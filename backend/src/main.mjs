@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import {DataTypes, Sequelize } from "sequelize"
-import { JWT_SUBJECT, JWT_SECRET, newEmailValidationJWT, newUserAuthorizationJWT, newUserAuthenticationJWT } from "./lib/jwt.mjs"
+import { jwt, JWT_SUBJECT, JWT_SECRET, newEmailValidationJWT, newUserAuthorizationJWT, newUserAuthenticationJWT } from "./lib/jwt.mjs"
 import { error } from "console"
 
 const app = express()
@@ -51,7 +51,7 @@ app.post("/usuarios/", async (request, response) => {
       const modeloUsuario = await Usuario.create(request.body)
       response.sendStatus(200)
       const token = newEmailValidationJWT(request.body.email)
-      console.log("http://localhost:8000/verify/"+token)
+      console.log("\n\n>>> Enlace verificación email: http://localhost:8000/verify/"+token)
       //TODO: Enviar correo con enlace de verificación, incluyendo JWT
     }
   
@@ -68,8 +68,9 @@ app.post("/usuarios/", async (request, response) => {
       const payload = jwt.verify(token, JWT_SECRET, {subject: JWT_SUBJECT.EMAIL_VALIDATION})
     
     if (payload) Usuario.update({verificado: true}, {where: {email: payload.email}})
+    return response.send("Ok")
     }
-    catch {
+    catch (error) {
       console.error(error)
       response.status(422)
       response.status()
@@ -90,13 +91,13 @@ app.post("/usuarios/", async (request, response) => {
     }
   }
   )
-  app.get("/login/", async (request, response) => {
+  app.post("/login/", async (request, response) => {
     try {
       const usuario = await Usuario.findOne({
         where: {email: request.body.email}
       })
       const token = newUserAuthenticationJWT(usuario)
-      console.log("http://localhost:8000/verify/"+token)
+      console.log("\n\n>>> Enlace verificación login: http://localhost:8000/verify-login/"+token)
       // TODO: enviar enlace por email
       response.status(200)
       response.send("Ok")

@@ -27,6 +27,7 @@ function newUserAuthenticationJWT(user) {
 }
 
 export {
+    jwt,
     JWT_SUBJECT,
     JWT_SECRET,
     newUserAuthorizationJWT,
